@@ -67,10 +67,35 @@ public enum LayoutEngine {
 
         for rule in layout.windows {
             let matches = WindowMatcher.findMatches(for: rule, in: snapshots)
+            let targetFrame = FrameNormalizer.denormalize(rule.frameNorm, to: display.visibleFrame)
 
             if matches.isEmpty {
-                logger.debug("No match for rule: \(rule.appBundleId)")
-                skipped += 1
+                // No existing window found - try to launch the application
+                logger.debug("No match for rule: \(rule.appBundleId), attempting to launch")
+
+                if dryRun {
+                    logger.info("[dry-run] Would launch \(rule.appBundleId)")
+                    applied += 1
+                    continue
+                }
+
+                do {
+                    try AppLauncher.launch(bundleId: rule.appBundleId)
+
+                    if let window = AppLauncher.waitForWindow(bundleId: rule.appBundleId) {
+                        let success = AXService.setWindowFrame(window, to: targetFrame)
+                        if success {
+                            logger.info("Launched and positioned \(rule.appBundleId)")
+                            applied += 1
+                        } else {
+                            failed.append((app: rule.appBundleId, reason: "Failed to set window frame after launch"))
+                        }
+                    } else {
+                        failed.append((app: rule.appBundleId, reason: "Timeout waiting for window"))
+                    }
+                } catch {
+                    failed.append((app: rule.appBundleId, reason: error.localizedDescription))
+                }
                 continue
             }
 
@@ -82,8 +107,6 @@ public enum LayoutEngine {
                 skipped += 1
                 continue
             }
-
-            let targetFrame = FrameNormalizer.denormalize(rule.frameNorm, to: display.visibleFrame)
 
             if dryRun {
                 logger

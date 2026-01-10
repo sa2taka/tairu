@@ -11,6 +11,8 @@ public enum TairuError: Error, LocalizedError {
     case fileWriteFailed(path: String, underlying: Error)
     case fileReadFailed(path: String, underlying: Error)
     case monitorStartFailed
+    case applicationNotFound(bundleId: String)
+    case windowAppearanceTimeout(bundleId: String)
 
     public var errorDescription: String? {
         switch self {
@@ -34,6 +36,10 @@ public enum TairuError: Error, LocalizedError {
             "Failed to read file \(path): \(underlying.localizedDescription)"
         case .monitorStartFailed:
             "Failed to start display monitor"
+        case let .applicationNotFound(bundleId):
+            "Application not found: \(bundleId)"
+        case let .windowAppearanceTimeout(bundleId):
+            "Timeout waiting for window to appear: \(bundleId)"
         }
     }
 }
