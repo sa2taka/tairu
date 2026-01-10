@@ -84,7 +84,7 @@ struct AgentCommand: ParsableCommand {
             guard let layout = try? LayoutStore.load(name: layoutName) else {
                 continue
             }
-            if layout.targetDisplay.displayUUID == display.uuid {
+            if layout.targetDisplay.displayUUID == display.uuid, layout.autoApply {
                 matchingLayouts.append((name: layoutName, layout: layout))
             }
         }

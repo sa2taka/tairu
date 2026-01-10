@@ -6,11 +6,21 @@ public struct Layout: Codable, Equatable, Sendable {
     public let schemaVersion: Int
     public let targetDisplay: TargetDisplay
     public let windows: [WindowRule]
+    public let autoApply: Bool
 
-    public init(targetDisplay: TargetDisplay, windows: [WindowRule]) {
+    public init(targetDisplay: TargetDisplay, windows: [WindowRule], autoApply: Bool = false) {
         self.schemaVersion = Self.currentSchemaVersion
         self.targetDisplay = targetDisplay
         self.windows = windows
+        self.autoApply = autoApply
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        schemaVersion = try container.decode(Int.self, forKey: .schemaVersion)
+        targetDisplay = try container.decode(TargetDisplay.self, forKey: .targetDisplay)
+        windows = try container.decode([WindowRule].self, forKey: .windows)
+        autoApply = try container.decodeIfPresent(Bool.self, forKey: .autoApply) ?? false
     }
 }
 

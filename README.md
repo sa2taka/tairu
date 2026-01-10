@@ -130,6 +130,7 @@ tairu doctor
   "targetDisplay": {
     "displayUUID": "37D8832A-2D66-02CA-B9F7-8F30A301B230"
   },
+  "autoApply": false,
   "windows": [
     {
       "appBundleId": "com.apple.Safari",
@@ -154,6 +155,7 @@ tairu doctor
 |-----------|------|------|
 | `schemaVersion` | Int | スキーマバージョン（現在は 1） |
 | `targetDisplay.displayUUID` | String | 対象ディスプレイの UUID |
+| `autoApply` | Bool? | `true` の場合、agent がディスプレイ接続時に自動適用（デフォルト: `false`） |
 | `windows` | Array | ウィンドウルールの配列 |
 
 ### WindowRule
