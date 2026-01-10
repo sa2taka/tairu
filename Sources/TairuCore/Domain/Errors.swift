@@ -10,6 +10,7 @@ public enum TairuError: Error, LocalizedError {
     case windowOperationFailed(app: String, reason: String)
     case fileWriteFailed(path: String, underlying: Error)
     case fileReadFailed(path: String, underlying: Error)
+    case monitorStartFailed
 
     public var errorDescription: String? {
         switch self {
@@ -31,6 +32,8 @@ public enum TairuError: Error, LocalizedError {
             "Failed to write file \(path): \(underlying.localizedDescription)"
         case let .fileReadFailed(path, underlying):
             "Failed to read file \(path): \(underlying.localizedDescription)"
+        case .monitorStartFailed:
+            "Failed to start display monitor"
         }
     }
 }
