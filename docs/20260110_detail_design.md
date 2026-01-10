@@ -1,4 +1,4 @@
-# macOS Window Layout Tiler — 詳細設計
+# macOS Window Layout Tairu — 詳細設計
 
 基本設計（`20260110_first_design.md`）を補完する詳細仕様。
 
@@ -114,7 +114,7 @@ let absoluteFrame = CGRect(
 ## 4. エラー型設計
 
 ```swift
-enum TilerError: Error, LocalizedError {
+enum TairuError: Error, LocalizedError {
     // 権限
     case accessibilityNotGranted
 
@@ -167,12 +167,12 @@ enum TilerError: Error, LocalizedError {
 
 | コマンド | 説明 |
 |---------|------|
-| `tiler doctor` | 環境診断（AX権限、ディスプレイ、検出ウィンドウ数） |
-| `tiler displays` | ディスプレイ一覧（UUID / name / visibleFrame） |
-| `tiler layouts` | 保存済みレイアウト一覧 |
-| `tiler save --display <uuid> --name <layout>` | レイアウト保存 |
-| `tiler apply --display <uuid> --name <layout>` | レイアウト適用 |
-| `tiler delete --name <layout>` | レイアウト削除 |
+| `tairu doctor` | 環境診断（AX権限、ディスプレイ、検出ウィンドウ数） |
+| `tairu displays` | ディスプレイ一覧（UUID / name / visibleFrame） |
+| `tairu layouts` | 保存済みレイアウト一覧 |
+| `tairu save --display <uuid> --name <layout>` | レイアウト保存 |
+| `tairu apply --display <uuid> --name <layout>` | レイアウト適用 |
+| `tairu delete --name <layout>` | レイアウト削除 |
 
 ### 共通オプション
 
@@ -183,7 +183,7 @@ enum TilerError: Error, LocalizedError {
 
 ### 出力例
 
-#### `tiler layouts`
+#### `tairu layouts`
 
 ```
 Available layouts:
@@ -192,7 +192,7 @@ Available layouts:
   - presentation (Display: GHI-456-JKL)
 ```
 
-#### `tiler save --display ABC-123 --name coding --dry-run`
+#### `tairu save --display ABC-123 --name coding --dry-run`
 
 ```
 [dry-run] Would save layout 'coding' for display ABC-123-DEF
@@ -211,32 +211,32 @@ Available layouts:
 import PackageDescription
 
 let package = Package(
-    name: "tiler",
+    name: "tairu",
     platforms: [
         .macOS(.v15)
     ],
     products: [
-        .executable(name: "tiler", targets: ["TilerCLI"]),
-        .library(name: "TilerCore", targets: ["TilerCore"])
+        .executable(name: "tairu", targets: ["TairuCLI"]),
+        .library(name: "TairuCore", targets: ["TairuCore"])
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0")
     ],
     targets: [
         .executableTarget(
-            name: "TilerCLI",
+            name: "TairuCLI",
             dependencies: [
-                "TilerCore",
+                "TairuCore",
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
         ),
         .target(
-            name: "TilerCore",
+            name: "TairuCore",
             dependencies: []
         ),
         .testTarget(
-            name: "TilerCoreTests",
-            dependencies: ["TilerCore"]
+            name: "TairuCoreTests",
+            dependencies: ["TairuCore"]
         )
     ]
 )
@@ -247,11 +247,11 @@ let package = Package(
 ## 7. ディレクトリ構成（更新版）
 
 ```
-tiler/
+tairu/
 ├─ Package.swift
 ├─ Sources/
-│  ├─ TilerCLI/
-│  │  ├─ TilerCLI.swift          # @main エントリポイント
+│  ├─ TairuCLI/
+│  │  ├─ TairuCLI.swift          # @main エントリポイント
 │  │  ├─ Commands/
 │  │  │  ├─ DoctorCommand.swift
 │  │  │  ├─ DisplaysCommand.swift
@@ -261,7 +261,7 @@ tiler/
 │  │  │  └─ DeleteCommand.swift   # 追加
 │  │  └─ CLIHelpers.swift
 │  │
-│  └─ TilerCore/
+│  └─ TairuCore/
 │     ├─ Domain/
 │     │  ├─ Display.swift
 │     │  ├─ Window.swift
@@ -281,7 +281,7 @@ tiler/
 │        └─ LayoutEngine.swift
 │
 └─ Tests/
-   └─ TilerCoreTests/
+   └─ TairuCoreTests/
       ├─ LayoutEngineTests.swift
       ├─ WindowMatcherTests.swift
       ├─ FrameNormalizerTests.swift  # 追加

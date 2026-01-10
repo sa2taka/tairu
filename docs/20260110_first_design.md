@@ -1,4 +1,4 @@
-# macOS Window Layout Tiler (Swift) — Coding Agent Task
+# macOS Window Layout Tairu (Swift) — Coding Agent Task
 
 ## 目的
 
@@ -24,10 +24,10 @@ macOS 上で以下を満たす CLI ツールを Swift で実装する。
 ### SwiftPM 構成
 
 ```
-tiler/
+tairu/
 ├─ Package.swift
 ├─ Sources/
-│  ├─ TilerCLI/              # executable
+│  ├─ TairuCLI/              # executable
 │  │  ├─ main.swift
 │  │  ├─ Commands/
 │  │  │  ├─ DoctorCommand.swift
@@ -36,7 +36,7 @@ tiler/
 │  │  │  └─ ApplyCommand.swift
 │  │  └─ CLIModels.swift
 │  │
-│  └─ TilerCore/             # library
+│  └─ TairuCore/             # library
 │     ├─ Domain/
 │     │  ├─ Display.swift
 │     │  ├─ Window.swift
@@ -54,7 +54,7 @@ tiler/
 │        └─ LayoutEngine.swift
 │
 └─ Tests/
-   └─ TilerCoreTests/
+   └─ TairuCoreTests/
       ├─ LayoutEngineTests.swift
       ├─ WindowMatcherTests.swift
       └─ DisplayNormalizationTests.swift
@@ -134,7 +134,7 @@ struct NormalizedFrame: Codable {
 
 - 指定 display に属する window のみ対象
 - visibleFrame を基準に frame を正規化して保存
-- JSON を `~/Library/Application Support/tiler/layouts/<name>.json` に書く
+- JSON を `~/Library/Application Support/tairu/layouts/<name>.json` に書く
 
 ### Apply
 
@@ -150,19 +150,19 @@ struct NormalizedFrame: Codable {
 
 ### Commands
 
-#### `tiler doctor`
+#### `tairu doctor`
 
 - AX 権限有無
 - ディスプレイ一覧
 - 検出可能 window 数
 
-#### `tiler displays`
+#### `tairu displays`
 
 - display UUID / name / visibleFrame
 
-#### `tiler save --display <uuid> --name <layout>`
+#### `tairu save --display <uuid> --name <layout>`
 
-#### `tiler apply --display <uuid> --name <layout>`
+#### `tairu apply --display <uuid> --name <layout>`
 
 > 全コマンドに `--dry-run` オプション対応
 
@@ -201,7 +201,7 @@ struct NormalizedFrame: Codable {
 ## 成果物
 
 - 上記構成の SwiftPM プロジェクト
-- `tiler doctor` が実行可能
+- `tairu doctor` が実行可能
 - save / apply が実装され、dry-run で挙動確認できる
 - Unit Test が `swift test` で通る
 
