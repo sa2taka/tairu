@@ -14,6 +14,7 @@ struct TairuCLI: ParsableCommand {
             ApplyCommand.self,
             DeleteCommand.self,
             MoveCommand.self,
+            AgentCommand.self,
         ]
     )
 }
