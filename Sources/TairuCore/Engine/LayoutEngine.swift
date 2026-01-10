@@ -48,8 +48,8 @@ public enum LayoutEngine {
     }
 
     public static func apply(_ layout: Layout, to display: Display, dryRun: Bool = false) throws -> ApplyResult {
-        // Get windows from ALL displays so we can move them to the target display
-        let windowRefs = try WindowQueryService.getAllWindowRefs()
+        // Get windows from ALL displays including other Spaces (uses private API)
+        let windowRefs = try WindowQueryService.getAllWindowRefsIncludingOtherSpaces()
 
         let snapshots = windowRefs.compactMap { ref -> WindowSnapshot? in
             guard let frame = AXService.getWindowFrame(ref.axElement) else { return nil }

@@ -124,4 +124,73 @@ public enum WindowQueryService {
 
         return refs
     }
+
+    /// Get all window refs including windows from other Spaces
+    /// Uses private API to detect windows on other Spaces
+    public static func getAllWindowRefsIncludingOtherSpaces() throws -> [WindowRef] {
+        guard AXService.checkAccessibility() else {
+            throw TairuError.accessibilityNotGranted
+        }
+
+        // 1. Get windows from current Space using standard API
+        var allRefs = try getAllWindowRefs()
+
+        // 2. Build a set of window IDs we already have
+        var existingWindowIDs = Set<CGWindowID>()
+        for ref in allRefs {
+            if let windowID = PrivateAPIs.getWindowID(from: ref.axElement) {
+                existingWindowIDs.insert(windowID)
+            }
+        }
+
+        // 3. Get all window infos from CGWindowListCopyWindowInfo (includes other Spaces)
+        let allWindowInfos = PrivateAPIs.getAllWindowInfos()
+
+        // 4. Find windows that are not in our current list
+        var appWindowCache: [pid_t: [AXUIElement]] = [:]
+
+        for info in allWindowInfos {
+            // Skip windows we already have
+            if existingWindowIDs.contains(info.windowID) {
+                continue
+            }
+
+            // Try to find the app
+            guard let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == info.pid }),
+                  app.activationPolicy == .regular,
+                  let bundleId = app.bundleIdentifier
+            else {
+                continue
+            }
+
+            // Get or cache the app's windows
+            if appWindowCache[info.pid] == nil {
+                let appElement = AXService.createApplicationElement(pid: info.pid)
+                appWindowCache[info.pid] = AXService.getWindows(for: appElement)
+            }
+
+            // Try to match by window ID using private API
+            if let windows = appWindowCache[info.pid] {
+                for window in windows {
+                    if let windowID = PrivateAPIs.getWindowID(from: window),
+                       windowID == info.windowID,
+                       !existingWindowIDs.contains(windowID)
+                    {
+                        let title = AXService.getWindowTitle(window)
+                        let ref = WindowRef(
+                            appBundleId: bundleId,
+                            title: title,
+                            axElement: window
+                        )
+                        allRefs.append(ref)
+                        existingWindowIDs.insert(windowID)
+                        logger.debug("Found window from other Space: \(bundleId) - \(title ?? "untitled")")
+                    }
+                }
+            }
+        }
+
+        logger.debug("Found \(allRefs.count) windows (including other Spaces)")
+        return allRefs
+    }
 }
