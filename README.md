@@ -122,6 +122,74 @@ tairu doctor
 ~/Library/Application Support/tairu/layouts/<name>.json
 ```
 
+## JSON スキーマ
+
+```json
+{
+  "schemaVersion": 1,
+  "targetDisplay": {
+    "displayUUID": "37D8832A-2D66-02CA-B9F7-8F30A301B230"
+  },
+  "windows": [
+    {
+      "appBundleId": "com.apple.Safari",
+      "titleMatch": {
+        "exact": "Apple"
+      },
+      "frameNorm": {
+        "x": 0.0,
+        "y": 0.0,
+        "w": 0.5,
+        "h": 1.0
+      },
+      "indexHint": 0
+    }
+  ]
+}
+```
+
+### フィールド説明
+
+| フィールド | 型 | 説明 |
+|-----------|------|------|
+| `schemaVersion` | Int | スキーマバージョン（現在は 1） |
+| `targetDisplay.displayUUID` | String | 対象ディスプレイの UUID |
+| `windows` | Array | ウィンドウルールの配列 |
+
+### WindowRule
+
+| フィールド | 型 | 説明 |
+|-----------|------|------|
+| `appBundleId` | String | アプリの Bundle ID |
+| `titleMatch` | Object? | タイトルマッチ条件（省略可） |
+| `frameNorm` | Object | 正規化されたフレーム座標 |
+| `indexHint` | Int? | 同一アプリの複数ウィンドウ識別用インデックス |
+
+### TitleMatch
+
+タイトルマッチは以下のいずれか：
+
+```json
+{ "exact": "完全一致するタイトル" }
+```
+
+```json
+{ "regex": "正規表現パターン" }
+```
+
+### NormalizedFrame
+
+座標はディスプレイの `visibleFrame` に対する相対値（0.0〜1.0）：
+
+| フィールド | 説明 |
+|-----------|------|
+| `x` | 左端からの相対位置 |
+| `y` | 上端からの相対位置 |
+| `w` | 幅の比率 |
+| `h` | 高さの比率 |
+
+例：画面左半分に配置する場合 → `x: 0.0, y: 0.0, w: 0.5, h: 1.0`
+
 ## 開発コマンド
 
 ```bash
