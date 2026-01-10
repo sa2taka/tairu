@@ -2,10 +2,11 @@
 
 ## 概要
 
-2つの機能を追加する：
+3つの機能を追加する：
 
 1. **tairu apply の拡張** - 他のディスプレイにあるウィンドウも移動して配置
-2. **tairu agent** - ディスプレイ接続を監視し、自動でレイアウトを適用
+2. **アプリ自動起動** - ウィンドウが存在しない場合、アプリを起動して配置
+3. **tairu agent** - ディスプレイ接続を監視し、自動でレイアウトを適用
 
 ---
 
@@ -41,7 +42,53 @@ let windowRefs = try WindowQueryService.getAllWindowRefs()
 
 ---
 
-## 2. 常駐エージェント (tairu agent)
+## 2. アプリケーション自動起動
+
+### 目的
+
+レイアウト適用時にウィンドウが存在しない場合、アプリケーションを自動起動し、ウィンドウが出現したら配置する。
+
+### 実装
+
+#### ファイル
+
+- `Sources/TairuCore/Services/AppLauncher.swift`
+
+#### AppLauncher
+
+```swift
+public enum AppLauncher {
+    /// アプリケーションを起動
+    public static func launch(bundleId: String) throws
+
+    /// ウィンドウが出現するまで待機（ポーリング）
+    public static func waitForWindow(
+        bundleId: String,
+        timeout: TimeInterval = 5.0,
+        pollInterval: TimeInterval = 0.3
+    ) -> AXUIElement?
+}
+```
+
+#### LayoutEngine.apply のフロー
+
+```
+for rule in layout.windows:
+  matches = findMatches(rule)
+  if matches.isEmpty:
+    launch(bundleId)
+    window = waitForWindow(bundleId, timeout: 5s)
+    if window:
+      setWindowFrame(window, targetFrame)
+    else:
+      failed += "timeout"
+  else:
+    // 既存のロジック
+```
+
+---
+
+## 3. 常駐エージェント (tairu agent)
 
 ### 目的
 
@@ -134,6 +181,7 @@ Sources/
 │
 └─ TairuCore/
    └─ Services/
+      ├─ AppLauncher.swift      # 新規
       └─ DisplayMonitor.swift   # 新規
 ```
 
@@ -141,13 +189,22 @@ Sources/
 
 ## 検証方法
 
-### apply 拡張
+### apply 拡張（別ディスプレイからの移動）
 
 ```bash
 swift build
 # ウィンドウを別ディスプレイに移動しておく
 tairu apply --name <layout> --dry-run  # 移動対象が表示されることを確認
 tairu apply --name <layout>
+```
+
+### アプリ自動起動
+
+```bash
+# Safari を終了させておく
+# Safari を含むレイアウトを適用
+tairu apply --name <layout>
+# Safari が起動し、指定位置に配置されることを確認
 ```
 
 ### AgentCommand
