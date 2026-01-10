@@ -13,6 +13,7 @@ struct TairuCLI: ParsableCommand {
             SaveCommand.self,
             ApplyCommand.self,
             DeleteCommand.self,
+            MoveCommand.self,
         ]
     )
 }
