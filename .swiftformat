@@ -1,0 +1,45 @@
+# SwiftFormat Configuration for tiler
+
+# Swift version
+--swiftversion 5.9
+
+# Indentation
+--indent 4
+--tabwidth 4
+--smarttabs enabled
+
+# Line breaks
+--linebreaks lf
+--maxwidth 120
+
+# Braces
+--allman false
+
+# Blank lines
+--trimwhitespace always
+
+# Imports
+--importgrouping alpha
+
+# Self
+--self remove
+
+# Trailing
+--commas always
+--decimalgrouping 3,6
+--semicolons never
+
+# Wrapping
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--closingparen balanced
+
+# Redundant
+--redundanttype inferred
+
+# Excluded paths
+--exclude .build,Package.swift
+
+# Disabled rules (let SwiftLint handle these)
+--disable redundantSelf
