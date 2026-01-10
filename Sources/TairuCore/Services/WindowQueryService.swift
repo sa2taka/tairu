@@ -49,9 +49,10 @@ public enum WindowQueryService {
     public static func getWindows(on display: Display) throws -> [WindowSnapshot] {
         let allWindows = try getAllWindows()
         return allWindows.filter { window in
-            // Use frame (not visibleFrame) for intersection check
-            // because window coordinates are in CG coordinate system
-            !window.isMinimized && display.frame.intersects(window.frame)
+            guard !window.isMinimized else { return false }
+            // Use findDisplay to get the display with largest intersection area
+            // This ensures windows are attributed to their primary display only
+            return DisplayService.findDisplay(containing: window.frame)?.uuid == display.uuid
         }
     }
 
@@ -106,7 +107,7 @@ public enum WindowQueryService {
             for window in windows {
                 guard let frame = AXService.getWindowFrame(window),
                       !AXService.isWindowMinimized(window),
-                      display.frame.intersects(frame)
+                      DisplayService.findDisplay(containing: frame)?.uuid == display.uuid
                 else {
                     continue
                 }
