@@ -6,6 +6,13 @@ struct TairuCLI: ParsableCommand {
         commandName: "tairu",
         abstract: "A window layout manager for macOS",
         version: "0.1.0",
-        subcommands: []
+        subcommands: [
+            DoctorCommand.self,
+            DisplaysCommand.self,
+            LayoutsCommand.self,
+            SaveCommand.self,
+            ApplyCommand.self,
+            DeleteCommand.self,
+        ]
     )
 }
