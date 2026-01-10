@@ -72,11 +72,14 @@ tairu layouts
 ### レイアウトを適用
 
 ```bash
-# 保存したレイアウトを適用
+# 保存したレイアウトを適用（保存時のディスプレイに適用）
+tairu apply --name <レイアウト名>
+
+# 別のディスプレイに適用
 tairu apply --display <UUID> --name <レイアウト名>
 
 # 何が適用されるか確認（実際には適用しない）
-tairu apply --display <UUID> --name <レイアウト名> --dry-run
+tairu apply --name <レイアウト名> --dry-run
 ```
 
 ### レイアウトを削除
