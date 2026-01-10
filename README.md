@@ -88,22 +88,6 @@ tairu apply --name <レイアウト名> --dry-run
 tairu delete --name <レイアウト名>
 ```
 
-### ウィンドウを別のディスプレイに移動
-
-```bash
-# アプリのウィンドウを指定ディスプレイに移動
-tairu move --app <bundle-id> --to <UUID>
-
-# 例: Safari を外部ディスプレイに移動
-tairu move --app com.apple.Safari --to 37D8832A-2D66-02CA-B9F7-8F30A301B230
-
-# ソースディスプレイから全ウィンドウを移動
-tairu move --from <source-uuid> --to <target-uuid>
-
-# 何が移動されるか確認（実際には移動しない）
-tairu move --app <bundle-id> --to <UUID> --dry-run
-```
-
 ### 常駐エージェント
 
 ディスプレイが接続されたときに自動でレイアウトを適用します。

@@ -1,60 +1,42 @@
-# ウィンドウ移動 + 常駐エージェント 設計
+# 常駐エージェント + apply 拡張 設計
 
 ## 概要
 
-2つの新機能を追加する：
+2つの機能を追加する：
 
-1. **tairu move** - ウィンドウを別のディスプレイに移動
+1. **tairu apply の拡張** - 他のディスプレイにあるウィンドウも移動して配置
 2. **tairu agent** - ディスプレイ接続を監視し、自動でレイアウトを適用
 
 ---
 
-## 1. ウィンドウ移動コマンド (tairu move)
+## 1. apply コマンドの拡張
 
 ### 目的
 
-指定したアプリのウィンドウを別のディスプレイに移動する。
+レイアウト適用時に、対象ウィンドウが別のディスプレイ（仮想デスクトップ含む）にある場合でも、ターゲットディスプレイに移動してきてから配置する。
 
-### CLI インターフェース
+### 現状の問題
 
-```bash
-# アプリのウィンドウを指定ディスプレイに移動
-tairu move --app <bundle-id> --to <display-uuid>
+- 現在の `apply` は対象ディスプレイ上のウィンドウのみを対象にしている
+- 別のディスプレイにあるウィンドウは検出されず、レイアウトが適用されない
 
-# 例: Safari を外部ディスプレイに移動
-tairu move --app com.apple.Safari --to 37D8832A-2D66-02CA-B9F7-8F30A301B230
+### 解決策
 
-# ソースディスプレイから全ウィンドウを移動
-tairu move --from <source-uuid> --to <target-uuid>
-```
+`LayoutEngine.apply` で:
+1. 全ディスプレイの全ウィンドウを取得
+2. レイアウトのルールにマッチするウィンドウを検索
+3. マッチしたウィンドウをターゲットディスプレイに移動して配置
 
-### オプション
+### 実装変更
 
-| オプション | 必須 | 説明 |
-|-----------|------|------|
-| `--app` | `--from` と排他 | 移動するアプリの Bundle ID |
-| `--from` | `--app` と排他 | 移動元ディスプレイの UUID |
-| `--to` | Yes | 移動先ディスプレイの UUID |
-| `--dry-run` | No | 実際には移動せず、何が移動されるか表示 |
+`Sources/TairuCore/Engine/LayoutEngine.swift` の `apply` メソッドを修正：
 
-### 実装
+```swift
+// Before: 対象ディスプレイのウィンドウのみ取得
+let windowRefs = try WindowQueryService.getWindowRefs(on: display)
 
-#### ファイル
-
-- `Sources/TairuCLI/Commands/MoveCommand.swift`
-
-#### ロジック
-
-1. `--to` で指定されたディスプレイの visibleFrame を取得
-2. 対象ウィンドウを特定（`--app` または `--from` で絞り込み）
-3. 各ウィンドウの相対位置を維持しつつ、ターゲットディスプレイの座標に変換
-4. `AXService.setWindowFrame` で移動
-
-#### 座標変換
-
-```
-移動先 X = targetDisplay.visibleFrame.origin.x + (window.x - sourceDisplay.visibleFrame.origin.x)
-移動先 Y = targetDisplay.visibleFrame.origin.y + (window.y - sourceDisplay.visibleFrame.origin.y)
+// After: 全ディスプレイのウィンドウを取得
+let windowRefs = try WindowQueryService.getAllWindowRefs()
 ```
 
 ---
@@ -140,13 +122,6 @@ public final class DisplayMonitor {
 
 保存先: `~/Library/LaunchAgents/com.example.tairu.agent.plist`
 
-#### レイアウト検索ロジック
-
-1. 新しいディスプレイの UUID を取得
-2. `LayoutStore.list()` で全レイアウトを取得
-3. 各レイアウトの `targetDisplay.displayUUID` と比較
-4. マッチしたレイアウトを適用
-
 ---
 
 ## ディレクトリ構成（追加分）
@@ -155,7 +130,6 @@ public final class DisplayMonitor {
 Sources/
 ├─ TairuCLI/
 │  └─ Commands/
-│     ├─ MoveCommand.swift      # 新規
 │     └─ AgentCommand.swift     # 新規
 │
 └─ TairuCore/
@@ -165,23 +139,15 @@ Sources/
 
 ---
 
-## 実装順序
-
-1. **MoveCommand** - 単純な機能追加、既存の Service で実現可能
-2. **DisplayMonitor** - CoreGraphics のコールバック登録
-3. **AgentCommand** - 常駐ロジック + launchd 連携
-
----
-
 ## 検証方法
 
-### MoveCommand
+### apply 拡張
 
 ```bash
 swift build
-tairu displays  # UUID を確認
-tairu move --app com.apple.Safari --to <uuid> --dry-run
-tairu move --app com.apple.Safari --to <uuid>
+# ウィンドウを別ディスプレイに移動しておく
+tairu apply --name <layout> --dry-run  # 移動対象が表示されることを確認
+tairu apply --name <layout>
 ```
 
 ### AgentCommand
