@@ -1,3 +1,4 @@
+import AppKit
 import ArgumentParser
 import Darwin
 import Foundation
@@ -63,14 +64,18 @@ struct AgentCommand: ParsableCommand {
 
         signal(SIGINT) { _ in
             print("\nStopping agent...")
-            Darwin.exit(0)
+            DispatchQueue.main.async {
+                NSApplication.shared.terminate(nil)
+            }
         }
         signal(SIGTERM) { _ in
             print("\nStopping agent...")
-            Darwin.exit(0)
+            DispatchQueue.main.async {
+                NSApplication.shared.terminate(nil)
+            }
         }
 
-        RunLoop.current.run()
+        NSApplication.shared.run()
     }
 
     private func handleDisplayAdded(_ display: Display) {
