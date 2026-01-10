@@ -42,7 +42,7 @@ public enum LayoutEngine {
         logger.info("Created layout with \(windowRules.count) window rules")
 
         return Layout(
-            targetDisplay: TargetDisplay(displayUUID: display.uuid),
+            targetDisplay: .uuid(display.uuid),
             windows: windowRules
         )
     }

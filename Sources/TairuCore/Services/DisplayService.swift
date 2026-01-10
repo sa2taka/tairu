@@ -33,6 +33,11 @@ public enum DisplayService {
         return display
     }
 
+    public static func getMainDisplay() -> Display? {
+        let mainDisplayID = CGMainDisplayID()
+        return makeDisplay(from: mainDisplayID)
+    }
+
     public static func findDisplay(containing frame: CGRect) -> Display? {
         guard let displays = try? getAllDisplays() else { return nil }
 

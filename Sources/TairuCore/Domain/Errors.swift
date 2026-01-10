@@ -13,6 +13,7 @@ public enum TairuError: Error, LocalizedError {
     case monitorStartFailed
     case applicationNotFound(bundleId: String)
     case windowAppearanceTimeout(bundleId: String)
+    case noMatchingDisplay
 
     public var errorDescription: String? {
         switch self {
@@ -40,6 +41,8 @@ public enum TairuError: Error, LocalizedError {
             "Application not found: \(bundleId)"
         case let .windowAppearanceTimeout(bundleId):
             "Timeout waiting for window to appear: \(bundleId)"
+        case .noMatchingDisplay:
+            "No display matches the specified criteria"
         }
     }
 }

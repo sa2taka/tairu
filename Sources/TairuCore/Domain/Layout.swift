@@ -24,14 +24,6 @@ public struct Layout: Codable, Equatable, Sendable {
     }
 }
 
-public struct TargetDisplay: Codable, Equatable, Sendable {
-    public let displayUUID: String
-
-    public init(displayUUID: String) {
-        self.displayUUID = displayUUID
-    }
-}
-
 public struct WindowRule: Codable, Equatable, Sendable {
     public let appBundleId: String
     public let titleMatch: TitleMatch?

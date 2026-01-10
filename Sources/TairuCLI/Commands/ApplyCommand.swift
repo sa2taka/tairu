@@ -18,8 +18,7 @@ struct ApplyCommand: ParsableCommand {
 
     func run() throws {
         let layout = try LayoutStore.load(name: name)
-        let displayUUID = display ?? layout.targetDisplay.displayUUID
-        let targetDisplay = try DisplayService.findDisplay(byUUID: displayUUID)
+        let targetDisplay = try resolveDisplay(layout: layout)
 
         let result = try LayoutEngine.apply(layout, to: targetDisplay, dryRun: dryRun)
 
@@ -38,6 +37,32 @@ struct ApplyCommand: ParsableCommand {
             for failure in result.failed {
                 print("  • \(failure.app): \(failure.reason)")
             }
+        }
+    }
+
+    private func resolveDisplay(layout: Layout) throws -> Display {
+        if let specifiedUUID = display {
+            return try DisplayService.findDisplay(byUUID: specifiedUUID)
+        }
+
+        switch layout.targetDisplay {
+        case let .uuid(uuid):
+            return try DisplayService.findDisplay(byUUID: uuid)
+
+        case let .anyOf(uuids):
+            let displays = try DisplayService.getAllDisplays()
+            guard let matched = displays.first(where: { uuids.contains($0.uuid) }) else {
+                throw TairuError.displayNotFound(uuid: uuids.joined(separator: ", "))
+            }
+            return matched
+
+        case let .criteria(criteria):
+            let displays = try DisplayService.getAllDisplays()
+            let mainDisplay = DisplayService.getMainDisplay()
+            guard let matched = displays.first(where: { criteria.matches($0, mainDisplay: mainDisplay) }) else {
+                throw TairuError.noMatchingDisplay
+            }
+            return matched
         }
     }
 }
