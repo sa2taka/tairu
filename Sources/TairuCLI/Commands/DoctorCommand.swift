@@ -1,3 +1,4 @@
+import AppKit
 import ArgumentParser
 import TairuCore
 
@@ -19,6 +20,16 @@ struct DoctorCommand: ParsableCommand {
         } else {
             print("✗ Accessibility permission NOT granted")
             print("  → Enable in System Settings > Privacy & Security > Accessibility")
+            print()
+            print("Open System Settings? [y/N]: ", terminator: "")
+            fflush(stdout)
+            if let input = readLine(), input.lowercased() == "y" {
+                if let url =
+                    URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
+                {
+                    NSWorkspace.shared.open(url)
+                }
+            }
         }
         print()
 
