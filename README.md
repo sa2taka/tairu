@@ -128,7 +128,7 @@ tairu doctor
 {
   "schemaVersion": 1,
   "targetDisplay": {
-    "displayUUID": "37D8832A-2D66-02CA-B9F7-8F30A301B230"
+    "uuid": "37D8832A-2D66-02CA-B9F7-8F30A301B230"
   },
   "autoApply": false,
   "windows": [
@@ -154,9 +154,45 @@ tairu doctor
 | フィールド | 型 | 説明 |
 |-----------|------|------|
 | `schemaVersion` | Int | スキーマバージョン（現在は 1） |
-| `targetDisplay.displayUUID` | String | 対象ディスプレイの UUID |
+| `targetDisplay` | Object | 対象ディスプレイの指定（下記参照） |
 | `autoApply` | Bool? | `true` の場合、agent がディスプレイ接続時に自動適用（デフォルト: `false`） |
 | `windows` | Array | ウィンドウルールの配列 |
+
+### TargetDisplay
+
+`targetDisplay` は以下の 3 つの形式のいずれかで指定できます:
+
+#### 1. 単一 UUID
+
+```json
+{ "uuid": "37D8832A-2D66-02CA-B9F7-8F30A301B230" }
+```
+
+#### 2. 複数 UUID (OR 条件)
+
+```json
+{ "anyOf": ["UUID-1", "UUID-2", "UUID-3"] }
+```
+
+いずれかの UUID にマッチすれば適用されます。
+
+#### 3. 条件マッチ (criteria)
+
+```json
+{
+  "criteria": {
+    "position": "right",
+    "aspectRatio": "portrait"
+  }
+}
+```
+
+| フィールド | 値 | 説明 |
+|-----------|------|------|
+| `position` | `left`, `right`, `top`, `bottom` | メインディスプレイからの相対位置 |
+| `aspectRatio` | `portrait`, `landscape` | 縦長 (`height > width`) / 横長 (`width >= height`) |
+
+両方指定した場合は AND 条件になります。
 
 ### WindowRule
 
