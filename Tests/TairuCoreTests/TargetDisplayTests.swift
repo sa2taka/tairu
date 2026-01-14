@@ -231,7 +231,8 @@ struct TargetDisplayTests {
             uuid: uuid,
             name: "Test Display",
             frame: frame,
-            visibleFrame: frame
+            visibleFrame: frame,
+            visibleFrameAX: frame
         )
     }
 }

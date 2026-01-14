@@ -78,12 +78,38 @@ public enum DisplayService {
         }
 
         let visibleFrame = screen?.visibleFrame ?? bounds
+        let visibleFrameAX = calculateVisibleFrameAX(bounds: bounds, screen: screen)
 
         return Display(
             uuid: uuid,
             name: screen?.localizedName,
             frame: bounds,
-            visibleFrame: visibleFrame
+            visibleFrame: visibleFrame,
+            visibleFrameAX: visibleFrameAX
+        )
+    }
+
+    /// Calculate visibleFrame in AX coordinate system (top-left origin)
+    /// - Parameters:
+    ///   - bounds: CGDisplayBounds (already in AX coordinate system)
+    ///   - screen: NSScreen for getting menu bar and Dock insets
+    /// - Returns: visibleFrame in AX coordinate system
+    private static func calculateVisibleFrameAX(bounds: CGRect, screen: NSScreen?) -> CGRect {
+        guard let screen else {
+            return bounds
+        }
+
+        // Calculate insets from NSScreen (Cocoa coordinate system)
+        // topInset: menu bar height (distance from screen top to visible area top)
+        let topInset = screen.frame.maxY - screen.visibleFrame.maxY
+        // leftInset: Dock width when positioned on the left
+        let leftInset = screen.visibleFrame.minX - screen.frame.minX
+
+        return CGRect(
+            x: bounds.origin.x + leftInset,
+            y: bounds.origin.y + topInset,
+            width: screen.visibleFrame.width,
+            height: screen.visibleFrame.height
         )
     }
 }

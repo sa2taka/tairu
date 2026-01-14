@@ -235,7 +235,8 @@ struct DisplayCriteriaTests {
             uuid: "test-uuid",
             name: "Test Display",
             frame: frame,
-            visibleFrame: frame
+            visibleFrame: frame,
+            visibleFrameAX: frame
         )
     }
 }

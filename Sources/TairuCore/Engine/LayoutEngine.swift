@@ -27,7 +27,7 @@ public enum LayoutEngine {
             let index = indexTracker[window.appBundleId, default: 0]
             indexTracker[window.appBundleId] = index + 1
 
-            let normalizedFrame = FrameNormalizer.normalize(window.frame, relativeTo: display.visibleFrame)
+            let normalizedFrame = FrameNormalizer.normalize(window.frame, relativeTo: display.visibleFrameAX)
 
             let rule = WindowRule(
                 appBundleId: window.appBundleId,
@@ -67,7 +67,7 @@ public enum LayoutEngine {
 
         for rule in layout.windows {
             let matches = WindowMatcher.findMatches(for: rule, in: snapshots)
-            let targetFrame = FrameNormalizer.denormalize(rule.frameNorm, to: display.visibleFrame)
+            let targetFrame = FrameNormalizer.denormalize(rule.frameNorm, to: display.visibleFrameAX)
 
             if matches.isEmpty {
                 // No existing window found - try to launch the application

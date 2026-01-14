@@ -101,4 +101,85 @@ struct FrameNormalizerTests {
         #expect(normalized.w == 0.5)
         #expect(normalized.h == 0.5)
     }
+
+    // MARK: - AX Coordinate System Tests (top-left origin)
+
+    @Test("when display has negative Y origin (above main display), should normalize correctly")
+    func normalizeOnDisplayAboveMain() {
+        // Arrange: Extended display above main display in AX coordinate system
+        // AX coordinate: top-left origin, Y increases downward
+        // When display is above main, its Y origin is negative
+        let visibleFrameAX = CGRect(x: 0, y: -1080, width: 1920, height: 1055)
+        let windowFrame = CGRect(x: 0, y: -1080, width: 960, height: 527)
+
+        // Act
+        let normalized = FrameNormalizer.normalize(windowFrame, relativeTo: visibleFrameAX)
+
+        // Assert: Window at top-left of display should normalize to (0, 0)
+        #expect(abs(normalized.x - 0.0) < 0.001)
+        #expect(abs(normalized.y - 0.0) < 0.001)
+        #expect(abs(normalized.w - 0.5) < 0.001)
+        #expect(abs(normalized.h - 0.5) < 0.01)
+    }
+
+    @Test("when display position changes, normalized coordinates remain valid for restoration")
+    func normalizeAfterDisplayPositionChange() {
+        // Arrange: Same relative window position, different display positions
+        // Scenario: External display moved from right side to above main display
+        let originalVisibleFrameAX = CGRect(x: 1920, y: 0, width: 1920, height: 1080)
+        let newVisibleFrameAX = CGRect(x: 0, y: -1080, width: 1920, height: 1080)
+
+        // Window at top-left corner of original display position
+        let originalWindowFrame = CGRect(
+            x: originalVisibleFrameAX.origin.x,
+            y: originalVisibleFrameAX.origin.y,
+            width: 960,
+            height: 540
+        )
+
+        // Act: Normalize from original position
+        let normalized = FrameNormalizer.normalize(originalWindowFrame, relativeTo: originalVisibleFrameAX)
+
+        // Restore to new display position
+        let restored = FrameNormalizer.denormalize(normalized, to: newVisibleFrameAX)
+
+        // Assert: Should be at top-left of new display position
+        #expect(abs(restored.origin.x - newVisibleFrameAX.origin.x) < 0.001)
+        #expect(abs(restored.origin.y - newVisibleFrameAX.origin.y) < 0.001)
+        #expect(abs(restored.width - 960) < 0.001)
+        #expect(abs(restored.height - 540) < 0.001)
+    }
+
+    @Test("when normalizing with menu bar offset, should account for top inset")
+    func normalizeWithMenuBarOffset() {
+        // Arrange: Main display with menu bar (25px) in AX coordinate system
+        // visibleFrameAX starts below menu bar
+        let visibleFrameAX = CGRect(x: 0, y: 25, width: 1920, height: 1055)
+        let windowFrame = CGRect(x: 0, y: 25, width: 960, height: 527)
+
+        // Act
+        let normalized = FrameNormalizer.normalize(windowFrame, relativeTo: visibleFrameAX)
+
+        // Assert: Window at top of visible area should normalize to y=0
+        #expect(abs(normalized.x - 0.0) < 0.001)
+        #expect(abs(normalized.y - 0.0) < 0.001)
+        #expect(abs(normalized.w - 0.5) < 0.001)
+    }
+
+    @Test("when roundtripping with negative Y origin, should restore accurately")
+    func roundtripWithNegativeOrigin() {
+        // Arrange: Display above main with negative Y
+        let visibleFrameAX = CGRect(x: 0, y: -1080, width: 1920, height: 1080)
+        let originalFrame = CGRect(x: 100, y: -980, width: 800, height: 600)
+
+        // Act
+        let normalized = FrameNormalizer.normalize(originalFrame, relativeTo: visibleFrameAX)
+        let restored = FrameNormalizer.denormalize(normalized, to: visibleFrameAX)
+
+        // Assert
+        #expect(abs(restored.origin.x - originalFrame.origin.x) < 1)
+        #expect(abs(restored.origin.y - originalFrame.origin.y) < 1)
+        #expect(abs(restored.size.width - originalFrame.size.width) < 1)
+        #expect(abs(restored.size.height - originalFrame.size.height) < 1)
+    }
 }
